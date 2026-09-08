@@ -9,6 +9,7 @@ import {
   createRefreshToken,
   hashRefreshToken,
 } from './auth.crypto.js';
+import { logger } from '../../config/logger.js';
 const publicUser = (u) => ({ id: u.id, username: u.username, email: u.email, status: u.status });
 const invalid = () =>
   new AppError({ statusCode: 401, code: ERROR_CODES.UNAUTHENTICATED, message: '用户名或密码错误' });
@@ -18,6 +19,7 @@ export async function register(data) {
     const user = await prisma.user.create({
       data: { username: data.username, email: data.email, passwordHash },
     });
+    logger.info({ userId: user.id }, 'auth registration succeeded');
     return publicUser(user);
   } catch (cause) {
     throw new AppError({
@@ -46,9 +48,15 @@ export async function login(identifier, password, meta) {
   const user = await prisma.user.findFirst({
     where: { OR: [{ username: identifier }, { email: identifier }], deletedAt: null },
   });
-  if (!user || user.status !== 'ACTIVE' || !(await verifyPassword(password, user.passwordHash)))
+  if (!user || user.status !== 'ACTIVE' || !(await verifyPassword(password, user.passwordHash))) {
+    logger.warn(
+      { identifierType: identifier.includes('@') ? 'email' : 'username' },
+      'auth login failed',
+    );
     throw invalid();
+  }
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+  logger.info({ userId: user.id }, 'auth login succeeded');
   return issue(user, meta);
 }
 export async function refresh(token, meta) {
