@@ -1,0 +1,72 @@
+{
+  "name": "fe-intellif-node-express-v1",
+  "version": "0.1.0",
+  "private": true,
+  "description": "基于 Express、MySQL、Prisma 与 Redis 的企业级后端基础模板",
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.0 <23",
+    "npm": ">=10.9.0 <11"
+  },
+  "packageManager": "npm@10.9.7",
+  "scripts": {
+    "dev": "node --import ./scripts/ensure-console-utf8.js --watch src/server.js",
+    "start": "node --import ./scripts/ensure-console-utf8.js src/server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:db:migrate": "node scripts/run-test-database-command.js migrate",
+    "test:db": "node scripts/run-test-database-command.js test",
+    "test:p2": "npm run test:db:migrate && npm run test:db && npm run check && npm run db:validate",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:status": "node scripts/database-status.js",
+    "db:init": "npm run db:migrate:deploy && npm run db:generate && npm run db:seed",
+    "check": "npm run lint && npm run format:check && npm test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,yml,yaml}": "prettier --write"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "prisma",
+    "redis"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "ioredis": "6.0.0",
+    "pino": "10.3.1",
+    "pino-http": "11.0.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.1",
+    "@commitlint/config-conventional": "21.2.0",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.8.1",
+    "globals": "17.11.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.3.0",
+    "prettier": "3.9.6",
+    "prisma": "6.19.3",
+    "supertest": "7.2.2",
+    "vitest": "4.1.10"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
