@@ -57,7 +57,14 @@ export async function refresh(token, meta) {
     where: { tokenHash: hash },
     include: { user: true },
   });
-  if (!session || session.expiresAt < new Date() || session.status !== 'ACTIVE') throw invalid();
+  if (!session || session.expiresAt < new Date() || session.status !== 'ACTIVE') {
+    if (session?.userId)
+      await prisma.refreshSession.updateMany({
+        where: { userId: session.userId, familyId: session.familyId, status: 'ACTIVE' },
+        data: { status: 'REVOKED', revokedAt: new Date(), revokeReason: 'replay-detected' },
+      });
+    throw invalid();
+  }
   const next = createRefreshToken();
   const nextSession = await prisma.$transaction(async (tx) => {
     const created = await tx.refreshSession.create({
@@ -95,4 +102,14 @@ export async function logout(userId, refreshToken) {
       where: { userId, tokenHash: hashRefreshToken(refreshToken), status: 'ACTIVE' },
       data: { status: 'REVOKED', revokedAt: new Date(), revokeReason: 'logout' },
     });
+}
+
+export async function logoutAll(userId) {
+  await prisma.$transaction([
+    prisma.refreshSession.updateMany({
+      where: { userId, status: 'ACTIVE' },
+      data: { status: 'REVOKED', revokedAt: new Date(), revokeReason: 'logout-all' },
+    }),
+    prisma.user.update({ where: { id: userId }, data: { tokenVersion: { increment: 1 } } }),
+  ]);
 }

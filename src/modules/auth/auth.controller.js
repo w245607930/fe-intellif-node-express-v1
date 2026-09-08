@@ -32,3 +32,7 @@ export async function logout(req, res) {
 export function me(req, res) {
   res.json(success(req.user));
 }
+export async function logoutAll(req, res) {
+  await service.logoutAll(req.user.id);
+  res.json(success(null, 'logged out'));
+}

@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { validate } from '../../middlewares/validate.js';
 import { authenticate } from '../../middlewares/auth.js';
+import { authRateLimit } from '../../middlewares/auth-rate-limit.js';
 import { credentialsSchema, loginSchema, logoutSchema, refreshSchema } from './auth.schema.js';
 import * as c from './auth.controller.js';
 export const authRouter = Router();
 authRouter.post('/register', validate({ body: credentialsSchema }), c.register);
-authRouter.post('/login', validate({ body: loginSchema }), c.login);
-authRouter.post('/refresh', validate({ body: refreshSchema }), c.refresh);
+authRouter.post('/login', authRateLimit, validate({ body: loginSchema }), c.login);
+authRouter.post('/refresh', authRateLimit, validate({ body: refreshSchema }), c.refresh);
 authRouter.post('/logout', authenticate, validate({ body: logoutSchema }), c.logout);
+authRouter.post('/logout-all', authenticate, c.logoutAll);
 authRouter.get('/me', authenticate, c.me);
