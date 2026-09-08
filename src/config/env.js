@@ -9,6 +9,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url().startsWith('mysql://').optional(),
   REDIS_URL: z.string().url().startsWith('redis://').optional(),
   REDIS_USERNAME: z.string().min(1).optional(),
+  JWT_ACCESS_SECRET: z.string().min(32).default('development-access-secret-change-me-32chars'),
+  JWT_ACCESS_TTL: z.string().default('15m'),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
 });
 
 const result = envSchema.safeParse(process.env);

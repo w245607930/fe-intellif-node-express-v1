@@ -46,9 +46,11 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@prisma/client": "6.19.3",
+    "bcryptjs": "3.0.2",
     "dotenv": "17.4.2",
     "express": "5.2.1",
     "ioredis": "6.0.0",
+    "jsonwebtoken": "9.0.2",
     "pino": "10.3.1",
     "pino-http": "11.0.0",
     "zod": "4.4.3"
