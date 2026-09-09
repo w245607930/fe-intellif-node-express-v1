@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { authenticate } from '../../middlewares/auth.js';
 import { requirePermission } from '../../middlewares/permission.js';
 import { validate } from '../../middlewares/validate.js';
-import { assignmentSchema, idSchema, permissionSchema, roleSchema } from './rbac.schema.js';
+import {
+  assignmentSchema,
+  idSchema,
+  permissionSchema,
+  rolePermissionSchema,
+  roleSchema,
+} from './rbac.schema.js';
 import * as c from './rbac.controller.js';
 export const rbacRouter = Router();
 rbacRouter.use(authenticate);
@@ -43,4 +49,16 @@ rbacRouter.delete(
   requirePermission('role:update'),
   validate({ body: assignmentSchema }),
   c.revokeRole,
+);
+rbacRouter.post(
+  '/role-permissions',
+  requirePermission('role:update'),
+  validate({ body: rolePermissionSchema }),
+  c.assignPermission,
+);
+rbacRouter.delete(
+  '/role-permissions',
+  requirePermission('role:update'),
+  validate({ body: rolePermissionSchema }),
+  c.revokePermission,
 );

@@ -14,3 +14,15 @@ export const assignRole = async (req, res) =>
   res.json(success(await service.assignRole(req.validated.body.userId, req.validated.body.roleId)));
 export const revokeRole = async (req, res) =>
   res.json(success(await service.revokeRole(req.validated.body.userId, req.validated.body.roleId)));
+export const assignPermission = async (req, res) =>
+  res.json(
+    success(
+      await service.assignPermission(req.validated.body.roleId, req.validated.body.permissionId),
+    ),
+  );
+export const revokePermission = async (req, res) =>
+  res.json(
+    success(
+      await service.revokePermission(req.validated.body.roleId, req.validated.body.permissionId),
+    ),
+  );

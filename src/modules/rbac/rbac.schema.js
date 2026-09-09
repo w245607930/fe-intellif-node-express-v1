@@ -14,3 +14,7 @@ export const assignmentSchema = z.object({
   userId: z.string().min(1).max(30),
   roleId: z.string().min(1).max(30),
 });
+export const rolePermissionSchema = z.object({
+  roleId: z.string().min(1).max(30),
+  permissionId: z.string().min(1).max(30),
+});

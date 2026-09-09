@@ -1,6 +1,6 @@
-import { AppError } from '../errors/app-error.js';
 import { ERROR_CODES } from '../constants/error-codes.js';
-import { prisma } from '../config/database.js';
+import { AppError } from '../errors/app-error.js';
+import { hasPermission } from '../modules/rbac/rbac.service.js';
 
 const PERMISSION_CODE = /^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$/;
 
@@ -12,32 +12,12 @@ export function assertPermissionCode(permissionCode) {
 export function requirePermission(permissionCode) {
   assertPermissionCode(permissionCode);
   return async function permissionMiddleware(request, _response, next) {
-    const admin = await prisma.user.findFirst({
-      where: {
-        id: request.user.id,
-        status: 'ACTIVE',
-        deletedAt: null,
-        roles: { some: { role: { code: 'admin', isSystem: true, deletedAt: null } } },
-      },
-      select: { id: true },
-    });
-    if (admin) {
-      next();
-      return;
-    }
-    const user = await prisma.user.findFirst({
-      where: {
-        id: request.user.id,
-        status: 'ACTIVE',
-        deletedAt: null,
-        roles: {
-          some: { role: { permissions: { some: { permission: { code: permissionCode } } } } },
-        },
-      },
-      select: { id: true },
-    });
-    if (!user)
-      throw new AppError({ statusCode: 403, code: ERROR_CODES.FORBIDDEN, message: '权限不足' });
+    if (!(await hasPermission(request.user.id, permissionCode)))
+      throw new AppError({
+        statusCode: 403,
+        code: ERROR_CODES.FORBIDDEN,
+        message: 'permission denied',
+      });
     next();
   };
 }
