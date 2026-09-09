@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { validate } from '../../middlewares/validate.js';
+import { authenticate } from '../../middlewares/auth.js';
+import { requirePermission } from '../../middlewares/permission.js';
+import { paginationSchema, userIdSchema } from './user.schema.js';
+import { listUsers, getUser } from './user.controller.js';
+export const userRouter = Router();
+userRouter.use(authenticate, requirePermission('user:list'));
+userRouter.get('/', validate({ query: paginationSchema }), listUsers);
+userRouter.get('/:id', validate({ params: userIdSchema }), getUser);
