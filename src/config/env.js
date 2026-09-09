@@ -15,6 +15,13 @@ const envSchema = z
     JWT_ACCESS_SECRET: z.string().min(32).default('development-access-secret-change-me-32chars'),
     JWT_ACCESS_TTL: z.string().default('15m'),
     REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
+    CORS_ORIGINS: z.string().default('http://localhost:3000'),
+    REQUEST_BODY_LIMIT: z
+      .string()
+      .regex(/^\d+(kb|mb)$/i)
+      .default('1mb'),
+    REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   })
   .superRefine((value, context) => {
     if (
@@ -25,6 +32,12 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['JWT_ACCESS_SECRET'],
         message: 'production requires an explicit JWT_ACCESS_SECRET',
+      });
+    if (value.NODE_ENV === 'production' && !process.env.CORS_ORIGINS?.trim())
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ORIGINS'],
+        message: 'production requires at least one CORS origin',
       });
   });
 

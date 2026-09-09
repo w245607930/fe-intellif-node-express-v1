@@ -1,7 +1,7 @@
 import { success } from '../../utils/response.js';
-import { checkRedisConnection } from '../../config/redis.js';
 import { ERROR_CODES } from '../../constants/error-codes.js';
 import { AppError } from '../../errors/app-error.js';
+import { checkReadiness } from './health.service.js';
 
 export function getLiveness(_request, response) {
   response.status(200).json(success({ status: 'ok' }));
@@ -9,7 +9,7 @@ export function getLiveness(_request, response) {
 
 export async function getReadiness(_request, response) {
   try {
-    await checkRedisConnection();
+    await checkReadiness();
   } catch (error) {
     throw new AppError({
       message: '依赖服务暂不可用',

@@ -20,6 +20,7 @@ export async function authenticate(request, _response, next) {
     });
     if (!user || user.tokenVersion !== payload.tv) throw new Error();
     request.user = user;
+    request.log = request.log.child({ userId: user.id });
     next();
   } catch (cause) {
     throw new AppError({

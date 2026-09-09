@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- P0、P1、P3 已完成，P2“数据持久化”已通过本机 MySQL 验收，P4“认证与会话”进行中。
+- P0～P5 已完成，P6“契约、安全与可观测性”进行中；P5 RBAC 已通过本机 MySQL 集成验收。
 - 已将原始规划拆解为 10 个实施阶段、99 项任务和对应验收门禁。
 - 已具备 Express 启动入口、环境校验、结构化日志、Request ID、健康检查和冒烟测试。
 
@@ -64,6 +64,11 @@ npm run check
 该命令依次执行 ESLint、Prettier 检查和 Vitest。Git 提交前会通过 Husky 和 lint-staged 检查暂存文件，提交信息遵循 Conventional Commits。
 
 ## 文档入口
+
+- [OpenAPI 文档](docs/api/openapi.md)
+- [错误码目录](docs/api/error-codes.md)
+- [日志规范](docs/development/日志规范.md)
+- [安全检查记录](docs/development/安全检查.md)
 
 - [工程与 AI 开发规则](AGENTS.md)
 - [项目文档中心](docs/README.md)
