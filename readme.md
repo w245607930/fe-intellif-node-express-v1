@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- P0“基线与决策冻结”和 P1“HTTP 与工程骨架”已完成，P2“数据持久化”进行中。
+- P0、P1、P3 已完成，P2“数据持久化”已通过本机 MySQL 验收，P4“认证与会话”进行中。
 - 已将原始规划拆解为 10 个实施阶段、99 项任务和对应验收门禁。
 - 已具备 Express 启动入口、环境校验、结构化日志、Request ID、健康检查和冒烟测试。
 
@@ -34,7 +34,7 @@ PowerShell 如果因执行策略拒绝 `npm.ps1`，可将命令中的 `npm` 替�
 
 项目启动脚本会在 Windows 交互式终端中自动切换到 UTF-8，确保 Pino 的中文日志正常显示。若直接执行 Node.js 入口且仍出现乱码，可先运行 `chcp 65001`，或统一通过下方 npm 脚本启动。
 
-数据库集成测试必须配置本机独立 MySQL 测试库，并通过 `TEST_DATABASE_URL` 指向名称包含独立 `test` 标识的数据库。先执行 `npm run test:db:migrate`，再执行 `npm run test:db`；完整 P2 验收使用 `npm run test:p2`。保护脚本会拒绝远程、开发或生产数据库。
+数据库集成测试必须配置本机独立 MySQL 测试库，并通过 `TEST_DATABASE_URL` 指向名称包含独立 `test` 标识的数据库。先执行 `npm run test:db:migrate`，再执行 `npm run test:db`；完整 P2 验收使用 `npm run test:p2`。保护脚本会拒绝远程、开发或生产数据库。Windows 本机 MySQL 8.4 默认安装目录为 `C:\Program Files\MySQL\MySQL Server 8.4`，数据库目录为 `C:\ProgramData\MySQL\MySQL Server 8.4\Data`。
 
 ## 本地运行
 
