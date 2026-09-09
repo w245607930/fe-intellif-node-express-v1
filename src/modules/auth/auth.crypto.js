@@ -5,6 +5,9 @@ import { env } from '../../config/env.js';
 
 export const hashPassword = (password) => bcrypt.hash(password, 12);
 export const verifyPassword = (password, hash) => bcrypt.compare(password, hash);
+const dummyPasswordHash = bcrypt.hash('not-a-valid-user-password', 12);
+export const burnPasswordVerification = async (password) =>
+  bcrypt.compare(password, await dummyPasswordHash);
 export function signAccessToken(user) {
   return jwt.sign({ sub: user.id, tv: user.tokenVersion }, env.JWT_ACCESS_SECRET, {
     expiresIn: env.JWT_ACCESS_TTL,

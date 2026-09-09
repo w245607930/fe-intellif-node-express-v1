@@ -2,7 +2,7 @@ import { z } from 'zod';
 export const credentialsSchema = z.object({
   username: z.string().min(3).max(64),
   email: z.string().email().max(191),
-  password: z.string().min(12).max(128),
+  password: z.string().min(12).max(128).regex(/[a-z]/).regex(/[A-Z]/).regex(/\d/),
 });
 export const loginSchema = z.object({
   identifier: z.string().min(3).max(191),

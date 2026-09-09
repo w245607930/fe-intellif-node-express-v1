@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import { Prisma } from '@prisma/client';
+import { env } from '../../config/env.js';
 import { prisma } from '../../config/database.js';
 import { AppError } from '../../errors/app-error.js';
 import { ERROR_CODES } from '../../constants/error-codes.js';
@@ -8,6 +10,7 @@ import {
   signAccessToken,
   createRefreshToken,
   hashRefreshToken,
+  burnPasswordVerification,
 } from './auth.crypto.js';
 import { logger } from '../../config/logger.js';
 const publicUser = (u) => ({ id: u.id, username: u.username, email: u.email, status: u.status });
@@ -16,12 +19,14 @@ const invalid = () =>
 export async function register(data) {
   const passwordHash = await hashPassword(data.password);
   try {
-    const user = await prisma.user.create({
-      data: { username: data.username, email: data.email, passwordHash },
-    });
+    const user = await prisma.$transaction((tx) =>
+      tx.user.create({ data: { username: data.username, email: data.email, passwordHash } }),
+    );
     logger.info({ userId: user.id }, 'auth registration succeeded');
     return publicUser(user);
   } catch (cause) {
+    if (!(cause instanceof Prisma.PrismaClientKnownRequestError) || cause.code !== 'P2002')
+      throw cause;
     throw new AppError({
       statusCode: 409,
       code: ERROR_CODES.CONFLICT,
@@ -37,7 +42,7 @@ async function issue(user, meta = {}) {
       userId: user.id,
       familyId: crypto.randomUUID(),
       tokenHash: hashRefreshToken(token),
-      expiresAt: new Date(Date.now() + 30 * 86400000),
+      expiresAt: new Date(Date.now() + env.REFRESH_TOKEN_TTL_DAYS * 86400000),
       userAgent: meta.userAgent,
       ipAddress: meta.ipAddress,
     },
@@ -48,7 +53,10 @@ export async function login(identifier, password, meta) {
   const user = await prisma.user.findFirst({
     where: { OR: [{ username: identifier }, { email: identifier }], deletedAt: null },
   });
-  if (!user || user.status !== 'ACTIVE' || !(await verifyPassword(password, user.passwordHash))) {
+  const passwordMatches = user
+    ? await verifyPassword(password, user.passwordHash)
+    : await burnPasswordVerification(password);
+  if (!user || user.status !== 'ACTIVE' || !passwordMatches) {
     logger.warn(
       { identifierType: identifier.includes('@') ? 'email' : 'username' },
       'auth login failed',
@@ -71,6 +79,7 @@ export async function refresh(token, meta) {
         where: { userId: session.userId, familyId: session.familyId, status: 'ACTIVE' },
         data: { status: 'REVOKED', revokedAt: new Date(), revokeReason: 'replay-detected' },
       });
+    logger.warn({ reason: session ? 'invalid-session' : 'unknown-token' }, 'auth refresh rejected');
     throw invalid();
   }
   const next = createRefreshToken();
@@ -97,6 +106,7 @@ export async function refresh(token, meta) {
     });
     return created;
   });
+  logger.info({ userId: session.userId, sessionId: nextSession.id }, 'auth refresh succeeded');
   return {
     accessToken: signAccessToken(session.user),
     refreshToken: next,
@@ -110,6 +120,7 @@ export async function logout(userId, refreshToken) {
       where: { userId, tokenHash: hashRefreshToken(refreshToken), status: 'ACTIVE' },
       data: { status: 'REVOKED', revokedAt: new Date(), revokeReason: 'logout' },
     });
+  logger.info({ userId }, 'auth session logged out');
 }
 
 export async function logoutAll(userId) {
@@ -120,4 +131,5 @@ export async function logoutAll(userId) {
     }),
     prisma.user.update({ where: { id: userId }, data: { tokenVersion: { increment: 1 } } }),
   ]);
+  logger.info({ userId }, 'all auth sessions logged out');
 }
