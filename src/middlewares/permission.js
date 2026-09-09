@@ -12,6 +12,19 @@ export function assertPermissionCode(permissionCode) {
 export function requirePermission(permissionCode) {
   assertPermissionCode(permissionCode);
   return async function permissionMiddleware(request, _response, next) {
+    const admin = await prisma.user.findFirst({
+      where: {
+        id: request.user.id,
+        status: 'ACTIVE',
+        deletedAt: null,
+        roles: { some: { role: { code: 'admin', isSystem: true, deletedAt: null } } },
+      },
+      select: { id: true },
+    });
+    if (admin) {
+      next();
+      return;
+    }
     const user = await prisma.user.findFirst({
       where: {
         id: request.user.id,
