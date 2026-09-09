@@ -22,6 +22,11 @@ const envSchema = z
       .default('1mb'),
     REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+    SCHEDULER_ENABLED: z.preprocess(
+      (value) => (value === 'true' ? true : value === 'false' ? false : value),
+      z.boolean().default(false),
+    ),
+    SCHEDULER_INTERVAL_MS: z.coerce.number().int().min(60_000).default(3_600_000),
   })
   .superRefine((value, context) => {
     if (

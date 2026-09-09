@@ -17,6 +17,7 @@ const requiredPaths = [
   '/rbac/permissions',
   '/rbac/role-permissions',
   '/rbac/user-roles',
+  '/jobs/diagnostic',
 ];
 const missing = requiredPaths.filter((path) => !openApiDocument.paths[path]);
 if (

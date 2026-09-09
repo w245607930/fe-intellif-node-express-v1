@@ -3,6 +3,7 @@ import { disconnectDatabase } from './config/database.js';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { disconnectRedis } from './config/redis.js';
+import { disconnectQueue } from './config/queue.js';
 
 const server = app.listen(env.PORT, env.HOST, () => {
   logger.info({ host: env.HOST, port: env.PORT }, 'HTTP 服务已启动');
@@ -35,6 +36,13 @@ async function shutdown(signal) {
       logger.info('Redis 连接已关闭');
     } catch (redisError) {
       logger.error({ err: redisError }, 'Redis 连接关闭失败');
+      process.exitCode = 1;
+    }
+    try {
+      await disconnectQueue();
+      logger.info('queue connections closed');
+    } catch (queueError) {
+      logger.error({ err: queueError }, 'queue connections close failed');
       process.exitCode = 1;
     }
   });

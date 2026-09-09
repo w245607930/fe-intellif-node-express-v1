@@ -6,7 +6,13 @@ export const openApiDocument = Object.freeze({
     description: 'Versioned authentication, user and RBAC APIs.',
   },
   servers: [{ url: '/api/v1' }],
-  tags: [{ name: 'Health' }, { name: 'Auth' }, { name: 'Users' }, { name: 'RBAC' }],
+  tags: [
+    { name: 'Health' },
+    { name: 'Auth' },
+    { name: 'Users' },
+    { name: 'RBAC' },
+    { name: 'Jobs' },
+  ],
   components: {
     securitySchemes: {
       bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -293,6 +299,28 @@ export const openApiDocument = Object.freeze({
           content: { 'application/json': { schema: { $ref: '#/components/schemas/Assignment' } } },
         },
         responses: { 200: { description: 'Role revoked' } },
+      },
+    },
+    '/jobs/diagnostic': {
+      post: {
+        tags: ['Jobs'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'Idempotency-Key', in: 'header', required: true, schema: { type: 'string' } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['message'],
+                properties: { message: { type: 'string' } },
+              },
+            },
+          },
+        },
+        responses: { 202: { description: 'Job queued' }, 200: { description: 'Duplicate job' } },
       },
     },
   },

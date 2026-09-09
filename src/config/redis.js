@@ -5,7 +5,7 @@ import { logger } from './logger.js';
 
 let redisClient;
 
-function getRedisConnectionOptions(redisUrl, redisUsername) {
+export function getRedisConnectionOptions(redisUrl, redisUsername) {
   const url = new URL(redisUrl);
   const password = decodeURIComponent(url.password);
 
