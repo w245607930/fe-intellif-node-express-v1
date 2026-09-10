@@ -18,6 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:db:migrate": "node scripts/run-test-database-command.js migrate",
     "test:db": "node scripts/run-test-database-command.js test",
@@ -31,7 +32,7 @@
     "db:init": "npm run db:migrate:deploy && npm run db:generate && npm run db:seed",
     "security:check": "node scripts/security-check.js",
     "contract:check": "node scripts/validate-openapi.js",
-    "check": "npm run lint && npm run format:check && npm test",
+    "check": "npm run lint && npm run format:check && npm run test:coverage && npm run db:validate && npm run contract:check && npm run security:check",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -66,6 +67,7 @@
     "@commitlint/cli": "21.2.1",
     "@commitlint/config-conventional": "21.2.0",
     "@eslint/js": "10.0.1",
+    "@vitest/coverage-v8": "4.1.11",
     "eslint": "10.8.1",
     "globals": "17.11.0",
     "husky": "9.1.7",
@@ -73,7 +75,7 @@
     "prettier": "3.9.6",
     "prisma": "6.19.3",
     "supertest": "7.2.2",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -1,14 +1,13 @@
 import { Worker } from 'bullmq';
 
-import { env } from './config/env.js';
-import { disconnectQueue, getQueueConnection } from './config/queue.js';
+import { disconnectQueue, getQueueConnection, QUEUE_PREFIX } from './config/queue.js';
 import { logger } from './config/logger.js';
 import { QUEUE_NAMES } from './constants/queue.js';
 import { processJob } from './modules/jobs/jobs.processor.js';
 
 const worker = new Worker(QUEUE_NAMES.SYSTEM, processJob, {
   connection: getQueueConnection(),
-  prefix: `fe-intellif:${env.NODE_ENV}:queue:bullmq`,
+  prefix: QUEUE_PREFIX,
   concurrency: 5,
 });
 

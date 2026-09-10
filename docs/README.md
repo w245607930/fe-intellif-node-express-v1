@@ -16,6 +16,8 @@
 
 P7 相关文档： [Jobs API](api/jobs.md)、[队列规范](development/队列规范.md)。
 
+P8 相关文档：[测试策略](testing/测试策略.md)、[安全检查记录](development/安全检查.md)。
+
 随着项目推进，按需建立以下目录，不提前制造空文档：
 
 ```text

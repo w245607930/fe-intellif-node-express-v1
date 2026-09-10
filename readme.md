@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- P0～P5 已完成，P6“契约、安全与可观测性”进行中；P5 RBAC 已通过本机 MySQL 集成验收。
+- P0～P8 已完成，下一阶段为 P9“生产部署与验收”；P7 队列、Worker 和调度器已通过本机 Redis 验收，P8 测试与质量门禁已通过。
 - 已将原始规划拆解为 10 个实施阶段、99 项任务和对应验收门禁。
 - 已具备 Express 启动入口、环境校验、结构化日志、Request ID、健康检查和冒烟测试。
 
@@ -61,7 +61,7 @@ npm start
 npm run check
 ```
 
-该命令依次执行 ESLint、Prettier 检查和 Vitest。Git 提交前会通过 Husky 和 lint-staged 检查暂存文件，提交信息遵循 Conventional Commits。
+该命令依次执行 ESLint、Prettier、Vitest 覆盖率、Prisma 校验、OpenAPI 校验和敏感信息扫描。Git 提交前会通过 Husky 和 lint-staged 检查暂存文件，提交信息遵循 Conventional Commits。详见 [测试策略](docs/testing/测试策略.md)。
 
 ## 文档入口
 
@@ -69,6 +69,8 @@ npm run check
 - [错误码目录](docs/api/error-codes.md)
 - [日志规范](docs/development/日志规范.md)
 - [安全检查记录](docs/development/安全检查.md)
+- [队列规范](docs/development/队列规范.md)
+- [Jobs API](docs/api/jobs.md)
 
 - [工程与 AI 开发规则](AGENTS.md)
 - [项目文档中心](docs/README.md)

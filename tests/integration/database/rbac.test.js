@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { app } from '../../../src/app.js';
-import { hashPassword } from '../../../src/modules/auth/auth.crypto.js';
 import { cleanTestDatabase, disconnectTestDatabase, testPrisma } from '../support/test-database.js';
+import { createTestPermission, createTestRole, createTestUser } from '../support/factories.js';
 describe('RBAC authorization', () => {
   beforeEach(cleanTestDatabase);
   afterAll(async () => {
@@ -10,16 +10,11 @@ describe('RBAC authorization', () => {
     await disconnectTestDatabase();
   });
   it('allows assigned permissions and denies after role revocation', async () => {
-    const user = await testPrisma.user.create({
-      data: {
-        username: 'rbac-user',
-        email: 'rbac@example.com',
-        passwordHash: await hashPassword('StrongPassword123'),
-      },
-    });
-    const role = await testPrisma.role.create({ data: { code: 'viewer', name: 'Viewer' } });
-    const permission = await testPrisma.permission.create({
-      data: { code: 'user:list', name: 'List users' },
+    const { user } = await createTestUser(testPrisma);
+    const role = await createTestRole(testPrisma, { code: 'viewer', name: 'Viewer' });
+    const permission = await createTestPermission(testPrisma, {
+      code: 'user:list',
+      name: 'List users',
     });
     await testPrisma.rolePermission.create({
       data: { roleId: role.id, permissionId: permission.id },
@@ -41,31 +36,26 @@ describe('RBAC authorization', () => {
   });
 
   it('maintains role-permission bindings through protected endpoints', async () => {
-    const admin = await testPrisma.user.create({
-      data: {
-        username: 'rbac-admin',
-        email: 'rbac-admin@example.com',
-        passwordHash: await hashPassword('StrongPassword123'),
-      },
+    const { user: admin } = await createTestUser(testPrisma, {
+      username: 'rbac-admin',
+      email: 'rbac-admin@example.com',
     });
     const adminRole = await testPrisma.role.create({
       data: { code: 'admin', name: 'Administrator', isSystem: true },
     });
     await testPrisma.userRole.create({ data: { userId: admin.id, roleId: adminRole.id } });
-    const target = await testPrisma.user.create({
-      data: {
-        username: 'rbac-target',
-        email: 'rbac-target@example.com',
-        passwordHash: await hashPassword('StrongPassword123'),
-      },
+    const { user: target } = await createTestUser(testPrisma, {
+      username: 'rbac-target',
+      email: 'rbac-target@example.com',
     });
     const login = await request(app)
       .post('/api/v1/auth/login')
       .send({ identifier: admin.username, password: 'StrongPassword123' });
     const token = login.body.data.accessToken;
-    const role = await testPrisma.role.create({ data: { code: 'operator', name: 'Operator' } });
-    const permission = await testPrisma.permission.create({
-      data: { code: 'user:list', name: 'List users' },
+    const role = await createTestRole(testPrisma, { code: 'operator', name: 'Operator' });
+    const permission = await createTestPermission(testPrisma, {
+      code: 'user:list',
+      name: 'List users',
     });
     const assign = await request(app)
       .post('/api/v1/rbac/role-permissions')

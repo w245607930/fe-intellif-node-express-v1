@@ -8,6 +8,7 @@ import { QUEUE_DEFAULTS, QUEUE_NAMES } from '../constants/queue.js';
 
 let queueConnection;
 let systemQueue;
+export const QUEUE_PREFIX = `${REDIS_KEY_PREFIX}:${env.NODE_ENV}:queue:bullmq`;
 
 function createQueueConnection() {
   if (!env.REDIS_URL) throw new Error('REDIS_URL is required for queues');
@@ -31,7 +32,7 @@ export function getQueueConnection() {
 export function getSystemQueue() {
   systemQueue ??= new Queue(QUEUE_NAMES.SYSTEM, {
     connection: getQueueConnection(),
-    prefix: `${REDIS_KEY_PREFIX}:${env.NODE_ENV}:queue:bullmq`,
+    prefix: QUEUE_PREFIX,
     defaultJobOptions: QUEUE_DEFAULTS,
   });
   return systemQueue;
